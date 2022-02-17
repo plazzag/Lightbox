@@ -429,7 +429,9 @@ extension LightboxController: HeaderViewDelegate {
           let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
           activityViewController.popoverPresentationController?.permittedArrowDirections = .any
           activityViewController.popoverPresentationController?.sourceView = shareButton
-          self.present(activityViewController, animated: true, completion: nil)
+          self.present(activityViewController, animated: true) {
+              headerView.shareButton.isEnabled = true
+          }
       } else {
           headerView.shareButton.isEnabled = true
       }
