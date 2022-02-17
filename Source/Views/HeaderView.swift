@@ -25,7 +25,8 @@ open class HeaderView: UIView {
       for: .touchUpInside)
 
     if let image = LightboxConfig.CloseButton.image {
-        button.setBackgroundImage(image, for: UIControl.State())
+        button.setImage(image, for: UIControl.State())
+        button.imageView?.contentMode = .center
     }
 
     button.isHidden = !LightboxConfig.CloseButton.enabled
@@ -52,7 +53,8 @@ open class HeaderView: UIView {
       for: .touchUpInside)
 
     if let image = LightboxConfig.ShareButton.image {
-        button.setBackgroundImage(image, for: UIControl.State())
+        button.setImage(image, for: UIControl.State())
+        button.imageView?.contentMode = .center
     }
 
     button.isHidden = !LightboxConfig.ShareButton.enabled
