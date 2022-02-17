@@ -1,7 +1,7 @@
 import UIKit
 
 protocol HeaderViewDelegate: class {
-  func headerView(_ headerView: HeaderView, didPressDeleteButton deleteButton: UIButton)
+  func headerView(_ headerView: HeaderView, didPressShareButton deleteButton: UIButton)
   func headerView(_ headerView: HeaderView, didPressCloseButton closeButton: UIButton)
 }
 
@@ -33,29 +33,29 @@ open class HeaderView: UIView {
     return button
   }()
 
-  open fileprivate(set) lazy var deleteButton: UIButton = { [unowned self] in
+  open fileprivate(set) lazy var shareButton: UIButton = { [unowned self] in
     let title = NSAttributedString(
-      string: LightboxConfig.DeleteButton.text,
-      attributes: LightboxConfig.DeleteButton.textAttributes)
+      string: LightboxConfig.ShareButton.text,
+      attributes: LightboxConfig.ShareButton.textAttributes)
 
     let button = UIButton(type: .system)
 
     button.setAttributedTitle(title, for: .normal)
 
-    if let size = LightboxConfig.DeleteButton.size {
+    if let size = LightboxConfig.ShareButton.size {
       button.frame.size = size
     } else {
       button.sizeToFit()
     }
 
-    button.addTarget(self, action: #selector(deleteButtonDidPress(_:)),
+    button.addTarget(self, action: #selector(shareButtonDidPress(_:)),
       for: .touchUpInside)
 
-    if let image = LightboxConfig.DeleteButton.image {
+    if let image = LightboxConfig.ShareButton.image {
         button.setBackgroundImage(image, for: UIControl.State())
     }
 
-    button.isHidden = !LightboxConfig.DeleteButton.enabled
+    button.isHidden = !LightboxConfig.ShareButton.enabled
 
     return button
   }()
@@ -69,7 +69,7 @@ open class HeaderView: UIView {
 
     backgroundColor = UIColor.clear
 
-    [closeButton, deleteButton].forEach { addSubview($0) }
+    [closeButton, shareButton].forEach { addSubview($0) }
   }
 
   public required init?(coder aDecoder: NSCoder) {
@@ -78,8 +78,8 @@ open class HeaderView: UIView {
 
   // MARK: - Actions
 
-  @objc func deleteButtonDidPress(_ button: UIButton) {
-    delegate?.headerView(self, didPressDeleteButton: button)
+  @objc func shareButtonDidPress(_ button: UIButton) {
+    delegate?.headerView(self, didPressShareButton: button)
   }
 
   @objc func closeButtonDidPress(_ button: UIButton) {
@@ -105,7 +105,7 @@ extension HeaderView: LayoutConfigurable {
       y: topPadding
     )
 
-    deleteButton.frame.origin = CGPoint(
+    shareButton.frame.origin = CGPoint(
       x: 17,
       y: topPadding
     )

@@ -93,9 +93,11 @@ open class LightboxController: UIViewController {
 
       reconfigurePagesForPreload()
 
+      headerView.shareButton.isEnabled = false
       pageDelegate?.lightboxController(self, didMoveToPage: currentPage)
 
       if let image = pageViews[currentPage].imageView.image, dynamicBackground {
+        headerView.shareButton.isEnabled = true
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.125) {
           self.loadDynamicBackground(image)
         }
@@ -388,7 +390,7 @@ extension LightboxController: PageViewDelegate {
     guard let image = image, dynamicBackground else {
       return
     }
-
+    headerView.shareButton.isEnabled = true
     let imageViewFrame = imageView.convert(imageView.frame, to: view)
     guard view.frame.intersects(imageViewFrame) else {
       return
@@ -420,32 +422,13 @@ extension LightboxController: PageViewDelegate {
 
 extension LightboxController: HeaderViewDelegate {
 
-  func headerView(_ headerView: HeaderView, didPressDeleteButton deleteButton: UIButton) {
-    deleteButton.isEnabled = false
-
-    guard numberOfPages != 1 else {
-      pageViews.removeAll()
-      self.headerView(headerView, didPressCloseButton: headerView.closeButton)
-      return
-    }
-
-    let prevIndex = currentPage
-
-    if currentPage == numberOfPages - 1 {
-      previous()
-    } else {
-      next()
-      currentPage -= 1
-    }
-
-    self.initialImages.remove(at: prevIndex)
-    self.pageViews.remove(at: prevIndex).removeFromSuperview()
-
-    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-      self.configureLayout(self.view.bounds.size)
-      self.currentPage = Int(self.scrollView.contentOffset.x / self.view.bounds.width)
-      deleteButton.isEnabled = true
-    }
+  func headerView(_ headerView: HeaderView, didPressShareButton shareButton: UIButton) {
+      headerView.shareButton.isEnabled = false
+      if let image = images[currentPage].image {
+          UIImageWriteToSavedPhotosAlbum(image, self, #selector(savedImage), nil)
+      } else {
+          headerView.shareButton.isEnabled = true
+      }
   }
 
   func headerView(_ headerView: HeaderView, didPressCloseButton closeButton: UIButton) {
@@ -454,6 +437,16 @@ extension LightboxController: HeaderViewDelegate {
     dismissalDelegate?.lightboxControllerWillDismiss(self)
     dismiss(animated: true, completion: nil)
   }
+
+    @objc func savedImage(_ im:UIImage, error: Error?, context: UnsafeMutableRawPointer?) {
+        if let err = error {
+            debugPrint(err)
+            headerView.shareButton.isEnabled = true
+            return
+        }
+        debugPrint("Saved Image")
+        headerView.shareButton.isEnabled = true
+    }
 }
 
 // MARK: - FooterViewDelegate
@@ -463,7 +456,7 @@ extension LightboxController: FooterViewDelegate {
   public func footerView(_ footerView: FooterView, didExpand expanded: Bool) {
     UIView.animate(withDuration: 0.25, animations: {
       self.overlayView.alpha = expanded ? 1.0 : 0.0
-      self.headerView.deleteButton.alpha = expanded ? 0.0 : 1.0
+      self.headerView.shareButton.alpha = expanded ? 0.0 : 1.0
     })
   }
 }
