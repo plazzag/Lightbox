@@ -425,7 +425,11 @@ extension LightboxController: HeaderViewDelegate {
   func headerView(_ headerView: HeaderView, didPressShareButton shareButton: UIButton) {
       headerView.shareButton.isEnabled = false
       if let image = images[currentPage].image {
-          UIImageWriteToSavedPhotosAlbum(image, self, #selector(savedImage), nil)
+          let shareItems:Array = [image] as [Any]
+          let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
+          activityViewController.popoverPresentationController?.permittedArrowDirections = .any
+          activityViewController.popoverPresentationController?.sourceView = shareButton
+          self.present(activityViewController, animated: true, completion: nil)
       } else {
           headerView.shareButton.isEnabled = true
       }
@@ -437,16 +441,6 @@ extension LightboxController: HeaderViewDelegate {
     dismissalDelegate?.lightboxControllerWillDismiss(self)
     dismiss(animated: true, completion: nil)
   }
-
-    @objc func savedImage(_ im:UIImage, error: Error?, context: UnsafeMutableRawPointer?) {
-        if let err = error {
-            debugPrint(err)
-            headerView.shareButton.isEnabled = true
-            return
-        }
-        debugPrint("Saved Image")
-        headerView.shareButton.isEnabled = true
-    }
 }
 
 // MARK: - FooterViewDelegate
