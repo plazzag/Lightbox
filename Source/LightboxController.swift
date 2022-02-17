@@ -424,11 +424,26 @@ extension LightboxController: HeaderViewDelegate {
 
   func headerView(_ headerView: HeaderView, didPressShareButton shareButton: UIButton) {
       headerView.shareButton.isEnabled = false
-      if let image = images[currentPage].image {
-          let shareItems:Array = [image] as [Any]
+      if let image = images[currentPage].image, let imageData = image.pngData(),
+         let imagePath = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)?.appendingPathExtension("png") {
+          do {
+              try imageData.write(to: imagePath)
+          } catch {
+              debugPrint("Failed to write temporary file to \(imagePath)")
+              return
+          }
+          
+          let shareItems:Array = [imagePath] as [Any]
           let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
           activityViewController.popoverPresentationController?.permittedArrowDirections = .any
           activityViewController.popoverPresentationController?.sourceView = shareButton
+          activityViewController.completionWithItemsHandler = { _, _, _, _ in
+              do {
+                  try FileManager.default.removeItem(at: imagePath)
+              } catch {
+                  debugPrint("Failed to delete temporary file from \(imagePath)")
+              }
+          }
           self.present(activityViewController, animated: true) {
               headerView.shareButton.isEnabled = true
           }
