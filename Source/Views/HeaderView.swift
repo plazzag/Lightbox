@@ -58,6 +58,8 @@ open class HeaderView: UIView {
     }
 
     button.isHidden = !LightboxConfig.ShareButton.enabled
+    button.isEnabled = false
+    button.alpha = 0.5
 
     return button
   }()

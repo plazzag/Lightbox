@@ -93,14 +93,19 @@ open class LightboxController: UIViewController {
 
       reconfigurePagesForPreload()
 
-      headerView.shareButton.isEnabled = false
       pageDelegate?.lightboxController(self, didMoveToPage: currentPage)
 
-      if let image = pageViews[currentPage].imageView.image, dynamicBackground {
+      if let image = pageViews[currentPage].imageView.image {
         headerView.shareButton.isEnabled = true
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.125) {
-          self.loadDynamicBackground(image)
-        }
+        headerView.shareButton.alpha = 1
+          if dynamicBackground {
+              DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.125) {
+                self.loadDynamicBackground(image)
+              }
+          }
+      } else {
+          headerView.shareButton.isEnabled = false
+          headerView.shareButton.alpha = 0.5
       }
     }
   }
@@ -387,10 +392,15 @@ extension LightboxController: UIScrollViewDelegate {
 extension LightboxController: PageViewDelegate {
 
   func remoteImageDidLoad(_ image: UIImage?, imageView: SDAnimatedImageView) {
-    guard let image = image, dynamicBackground else {
+    guard let image = image else {
       return
     }
     headerView.shareButton.isEnabled = true
+    headerView.shareButton.alpha = 1
+    
+    guard dynamicBackground else {
+        return
+    }
     let imageViewFrame = imageView.convert(imageView.frame, to: view)
     guard view.frame.intersects(imageViewFrame) else {
       return
@@ -424,6 +434,7 @@ extension LightboxController: HeaderViewDelegate {
 
   func headerView(_ headerView: HeaderView, didPressShareButton shareButton: UIButton) {
       headerView.shareButton.isEnabled = false
+      headerView.shareButton.alpha = 0.5
       if let image = images[currentPage].image, let imageData = image.pngData(),
          let imagePath = NSURL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString)?.appendingPathExtension("png") {
           do {
@@ -446,9 +457,11 @@ extension LightboxController: HeaderViewDelegate {
           }
           self.present(activityViewController, animated: true) {
               headerView.shareButton.isEnabled = true
+              headerView.shareButton.alpha = 1
           }
       } else {
           headerView.shareButton.isEnabled = true
+          headerView.shareButton.alpha = 1
       }
   }
 
